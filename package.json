@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "deploy": "fly deploy",
+    "logs:prod": "fly logs",
     "dev": "npx nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "",
