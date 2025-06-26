@@ -3,17 +3,23 @@ const dummy = () => {
 }
 
 const totalLikes = (blogs) => {
-    if(blogs.length === 0) return 0
-    if(blogs.length === 1) return blogs[0].likes
+  return blogs.reduce((sum, blog) => sum + blog.likes, 0);
+};
 
-    let countLikes = 0
-    blogs.forEach(blog => {
-        countLikes += blog.likes
-    });
-    return countLikes
-}
+const favoriteBlog = (blogs) => {
+  if (!Array.isArray(blogs) || blogs.length === 0) return null;
+
+  const blogWithMostLikes = blogs.reduce((prev, curr) =>
+    curr.likes > prev.likes ? curr : prev
+  );
+
+  const { title, author, likes } = blogWithMostLikes;
+  return { title, author, likes };
+};
+
 
 module.exports = {
   dummy,
-  totalLikes
+  totalLikes,
+  favoriteBlog
 }

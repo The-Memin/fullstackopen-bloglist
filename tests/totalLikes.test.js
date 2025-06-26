@@ -1,7 +1,7 @@
 const { test, describe } = require('node:test')
 const assert = require('node:assert')
-const totalLikes = require('../utils/list_helper').totalLikes
-const { listWithOneBlog, blogs } = require('../constants/blogs')
+const { totalLikes, favoriteBlog } = require('../utils/list_helper')
+const { listWithOneBlog, blogs, maxLikesBlog, maxLikesBlogSingle } = require('../constants/blogs')
 
 describe('total likes', () => {
     test('of empty list is zero', () => {
@@ -18,4 +18,21 @@ describe('total likes', () => {
         const result = totalLikes(blogs)
         assert.strictEqual(result, 36)
     })
+})
+
+describe('favoriteBlog', () => {
+    test('returns null for an empty list', () => {
+        const result = favoriteBlog([])
+        assert.strictEqual(result, null)
+    })
+
+    test('returns the blog itself when list has only one blog', () => {
+        const result = favoriteBlog(listWithOneBlog)
+        assert.deepStrictEqual(result, maxLikesBlogSingle)
+    })
+
+    test('returns the blog with the most likes from a larger list', () => {
+        const result = favoriteBlog(blogs)
+        assert.deepStrictEqual(result, maxLikesBlog)
+     })
 })
