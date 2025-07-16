@@ -1,12 +1,12 @@
-GET http://localhost:3003/api/blogs
+GET http://localhost:3001/api/blogs
 
 ###
-POST http://localhost:3003/api/blogs
+POST http://localhost:3001/api/blogs
 Content-Type: application/json
 
 {
-    "title": "New Blog",
-    "author": "Guillermo",
-    "url": "www.blog.com.mx",
-    "likes": 12
+    "title": "Blog 3",
+    "author": "Yoplay",
+    "url": "www.yomerengues.com.mx",
+    "likes": 300
 }
