@@ -5,29 +5,16 @@ const app = require('../app')
 const Blog = require('../models/blog')
 const assert = require('node:assert')
 
-const api = supertest(app)
+const { initialBlogs } = require('./test_helper')
 
-const initialBlogs = [
-    {
-        "title": "Blog 1",
-        "author": "Guillermo",
-        "url": "www.blog.com.mx",
-        "likes": 250
-    },
-    {
-        "title": "Blog 2",
-        "author": "Desiré",
-        "url": "www.blogMyLove.com.mx",
-        "likes": 300
-    }
-]
+const api = supertest(app)
 
 beforeEach( async () => {
     await Blog.deleteMany({})
-    let blogObject = new Blog(initialBlogs[0])
-    await blogObject.save()
-    blogObject = new Blog(initialBlogs[1])
-    await blogObject.save()
+
+    const blogObjects = initialBlogs.map(blog => new Blog(blog))
+    const promiseArray = blogObjects.map(blog => blog.save())
+    await Promise.all(promiseArray)
 })
 
 test('notes are returned as json', async () => {
