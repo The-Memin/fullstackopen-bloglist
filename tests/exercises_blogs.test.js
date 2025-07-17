@@ -8,6 +8,7 @@ const assert = require('node:assert')
 const api = supertest(app)
 const helper = require('./test_helper')
 
+
 beforeEach( async () => {
     await Blog.deleteMany({})
 
@@ -15,7 +16,6 @@ beforeEach( async () => {
     const promiseArray = blogObjects.map(blog => blog.save())
     await Promise.all(promiseArray)
 })
-
 describe('GET /api/blogs', () => {
     test('notes are returned as json', async () => {
         await api
@@ -108,6 +108,24 @@ describe('POST /api/blogs', () => {
         assert.ok(response.body.error, 'There should be an error message')
         assert.match(response.body.error, /url.*required/i)
 
+    })
+})
+
+describe('Delete blog', () => {
+    test('Detele blog by id', async () => {
+        const blogsAtStart = await helper.blogsInDb()
+        const blogToDelete = blogsAtStart[0]
+
+        await api
+            .delete(`/api/blogs/${blogToDelete.id}`)
+            .expect(204)
+
+        const blogsAtEnd = await helper.blogsInDb()
+
+        const titles = blogsAtEnd.map(r => r.title)
+        assert(!titles.includes(blogToDelete.title))
+
+        assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1)
     })
 })
 
