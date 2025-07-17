@@ -127,6 +127,36 @@ describe('Delete blog', () => {
 
         assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length - 1)
     })
+
+    test('Returns 400 Bad Request when deleting a blog with invalid ID', async () => {
+        const response = await api
+            .delete(`/api/blogs/invalidID`)
+            .expect(400)
+            .expect('Content-Type', /application\/json/)
+
+        const blogsAtEnd = await helper.blogsInDb()
+
+        assert.ok(response.body.error, 'There should be an error message')
+        assert.match(response.body.error, /invalid ID/)
+        assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+    })
+
+    test('Returns 404 Not Found when deleting a blog with a valid but non-existent ID', async () => {
+
+        const validNonExistentId = new mongoose.Types.ObjectId().toString()
+
+        const response = await api
+            .delete(`/api/blogs/${validNonExistentId}`)
+            .expect(404)
+            .expect('Content-Type', /application\/json/)
+
+        assert.ok(response.body.error, 'There should be an error message')
+        assert.match(response.body.error, /no found/i)
+
+        const blogsAtEnd = await helper.blogsInDb()
+        assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+    })
+
 })
 
 after(async () => {
