@@ -8,6 +8,7 @@ const assert = require('node:assert')
 const api = supertest(app)
 const helper = require('./test_helper')
 
+const nonExistingId = new mongoose.Types.ObjectId().toString()
 
 beforeEach( async () => {
     await Blog.deleteMany({})
@@ -111,7 +112,7 @@ describe('POST /api/blogs', () => {
     })
 })
 
-describe('Delete blog', () => {
+describe('DELETE /api/blogs', () => {
     test('Detele blog by id', async () => {
         const blogsAtStart = await helper.blogsInDb()
         const blogToDelete = blogsAtStart[0]
@@ -143,10 +144,8 @@ describe('Delete blog', () => {
 
     test('Returns 404 Not Found when deleting a blog with a valid but non-existent ID', async () => {
 
-        const validNonExistentId = new mongoose.Types.ObjectId().toString()
-
         const response = await api
-            .delete(`/api/blogs/${validNonExistentId}`)
+            .delete(`/api/blogs/${nonExistingId}`)
             .expect(404)
             .expect('Content-Type', /application\/json/)
 
@@ -157,6 +156,54 @@ describe('Delete blog', () => {
         assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
     })
 
+})
+
+describe('PUT /api/blogs', () => {
+    test('successfully updates likes of a blog post', async () => {
+        const blogsAtStart = await helper.blogsInDb()
+        const blogToUpdate = blogsAtStart[0]
+
+        const updatedBlog = {
+            'likes': blogToUpdate.likes + 1
+        }
+
+        const response = await api
+            .put(`/api/blogs/${blogToUpdate.id}`)
+            .send(updatedBlog)
+            .expect(200)
+            .expect('Content-Type', /application\/json/)
+
+        assert.strictEqual(response.body.likes, blogToUpdate.likes + 1)
+        assert.strictEqual(response.body.title, blogToUpdate.title)
+        assert.strictEqual(response.body.url, blogToUpdate.url)
+        assert.strictEqual(response.body.author, blogToUpdate.author)
+
+        const updated = await Blog.findById(blogToUpdate.id)
+        assert.strictEqual(updated.likes, blogToUpdate.likes + 1)
+    })
+
+    test('fails with status 400 if ID is invalid', async () => {
+        const invalidId = '123invalidid'
+        await api
+            .put(`/api/blogs/${invalidId}`)
+            .send({ likes: 10 })
+            .expect(400)
+    })
+
+    test('returns 404 if blog does not exist', async () => {
+
+        const updatedBlog = {
+            title: 'Nonexistent Blog',
+            author: 'Ghost Author',
+            url: 'http://ghost.url',
+            likes: 0
+        }
+
+        await api
+            .put(`/api/blogs/${nonExistingId}`)
+            .send(updatedBlog)
+            .expect(404) // o 204 si decides que no hay contenido
+    })
 })
 
 after(async () => {
