@@ -1,4 +1,4 @@
-const { test, describe, after, beforeEach } = require('node:test')
+const { test, describe, after, beforeEach, before } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
@@ -31,12 +31,22 @@ describe('GET /api/blogs', () => {
 })
 
 describe('POST /api/blogs', () => {
+    let userId
+
+    before(async () => {
+        const users = await helper.usersInDb()
+        userId = users[0].id
+    })
+
     test('a valid blog can be added', async () => {
+        const users = await helper.usersInDb()
+
         const newBlog = {
-            "title": "async/await simplifies making async calls",
-            "author": "Yo",
-            "url": "www.yoyo.com.mx",
-            "likes": 3023
+            title: "async/await simplifies making async calls",
+            author: "Yo",
+            url: "www.yoyo.com.mx",
+            likes: 3023,
+            userId
         }
 
         await api
@@ -50,15 +60,19 @@ describe('POST /api/blogs', () => {
         const titles = response.body.map(r => r.title)
 
         assert.strictEqual(response.body.length, helper.initialBlogs.length + 1)
-
         assert(titles.includes("async/await simplifies making async calls"))
+
+        const addedBlog = response.body.find(b => b.title === newBlog.title)
+        assert.strictEqual(addedBlog.user.toString(), users[0].id)
     })
 
     test('If the likes property is missing in the request, it will default to 0', async () => {
+
         const newBlog = {
-            'title': 'New Blog',
-            "author": 'author2',
-            "url": "www.author2.com"
+            title: 'New Blog',
+            author: 'author2',
+            url: "www.author2.com",
+            userId
         }
 
         await api
@@ -76,9 +90,11 @@ describe('POST /api/blogs', () => {
     })
 
     test('fails with 400 if it has no title', async () => {
+
         const newBlog = {
-            "author": 'Guillermo',
-            "url": "www.example.com"
+            author: 'Guillermo',
+            url: "www.example.com",
+            userId
         }
 
         const response = await api
@@ -93,9 +109,11 @@ describe('POST /api/blogs', () => {
     })
 
     test('fails with 400 if it has no url', async () => {
+        const users = await helper.usersInDb()
         const newBlog = {
-            "title": "Blog without URL",
-            "author": 'Guillermo',
+            title: "Blog without URL",
+            author: 'Guillermo',
+            userId: users[0].id
         }
 
         const response = await api

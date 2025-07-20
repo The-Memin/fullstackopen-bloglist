@@ -4,15 +4,14 @@ const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
 const assert = require('node:assert')
-
-const { initialBlogs } = require('./test_helper')
+const helper = require('./test_helper')
 
 const api = supertest(app)
 
 beforeEach( async () => {
     await Blog.deleteMany({})
 
-    const blogObjects = initialBlogs.map(blog => new Blog(blog))
+    const blogObjects = helper.initialBlogs.map(blog => new Blog(blog))
     const promiseArray = blogObjects.map(blog => blog.save())
     await Promise.all(promiseArray)
 })
@@ -25,17 +24,18 @@ test('blogs are returned as json', async () => {
 })
 
 test('there are two blogs', async () => {
-    console.log(process.env.NODE_ENV)
     const response = await api.get('/api/blogs')
-    assert.strictEqual(response.body.length, initialBlogs.length)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length)
 })
 
 test('a valid blog can be added', async () => {
+    const users = await helper.usersInDb()
     const newBlog = {
-        "title": "async/await simplifies making async calls",
-        "author": "Yo",
-        "url": "www.yoyo.com.mx",
-        "likes": 3023
+        title: "async/await simplifies making async calls",
+        author: "Yo",
+        url: "www.yoyo.com.mx",
+        likes: 3023,
+        userId: users[0].id
     }
 
     await api
@@ -48,7 +48,7 @@ test('a valid blog can be added', async () => {
 
     const titles = response.body.map(r => r.title)
 
-    assert.strictEqual(response.body.length, initialBlogs.length + 1)
+    assert.strictEqual(response.body.length, helper.initialBlogs.length + 1)
 
     assert(titles.includes("async/await simplifies making async calls"))
 })
