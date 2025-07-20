@@ -5,8 +5,9 @@ POST http://localhost:3001/api/blogs
 Content-Type: application/json
 
 {
-    "title": "Blog 3",
-    "author": "Yoplay",
-    "url": "www.yomerengues.com.mx",
-    "likes": 300
+    "title": "Mi nuevo blog",
+    "author": "The Memin",
+    "url": "www.newblog.com.mx",
+    "likes": 300,
+    "userId": "687c3cd00cf60e0cd8b68754"
 }

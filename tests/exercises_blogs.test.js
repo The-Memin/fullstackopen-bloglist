@@ -8,8 +8,6 @@ const assert = require('node:assert')
 const api = supertest(app)
 const helper = require('./test_helper')
 
-const nonExistingId = new mongoose.Types.ObjectId().toString()
-
 beforeEach( async () => {
     await Blog.deleteMany({})
 
@@ -18,7 +16,7 @@ beforeEach( async () => {
     await Promise.all(promiseArray)
 })
 describe('GET /api/blogs', () => {
-    test('notes are returned as json', async () => {
+    test('blogs are returned as json', async () => {
         await api
             .get('/api/blogs')
             .expect(200)
@@ -143,7 +141,7 @@ describe('DELETE /api/blogs', () => {
     })
 
     test('Returns 404 Not Found when deleting a blog with a valid but non-existent ID', async () => {
-
+        const nonExistingId = await helper.nonExistingId()
         const response = await api
             .delete(`/api/blogs/${nonExistingId}`)
             .expect(404)
@@ -198,11 +196,11 @@ describe('PUT /api/blogs', () => {
             url: 'http://ghost.url',
             likes: 0
         }
-
+        const nonExistingId = await helper.nonExistingId()
         await api
             .put(`/api/blogs/${nonExistingId}`)
             .send(updatedBlog)
-            .expect(404) // o 204 si decides que no hay contenido
+            .expect(404)
     })
 })
 
