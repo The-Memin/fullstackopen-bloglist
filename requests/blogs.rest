@@ -3,11 +3,11 @@ GET http://localhost:3001/api/blogs
 ###
 POST http://localhost:3001/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRoZS1NZW1pbiIsImlkIjoiNjg3YzNjZDAwY2Y2MGUwY2Q4YjY4NzU0IiwiaWF0IjoxNzUzMDU0NTAxfQ.KsbiaWtCz5t_1Le7JdW_BCcNwKodMn7XH6gpYs1ax6M
 
 {
-    "title": "Mi nuevo blog",
-    "author": "The Memin",
+    "title": "Blog con token",
+    "author": "The-Memin",
     "url": "www.newblog.com.mx",
-    "likes": 300,
-    "userId": "687c3cd00cf60e0cd8b68754"
+    "likes": 300
 }

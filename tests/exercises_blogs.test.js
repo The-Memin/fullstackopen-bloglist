@@ -1,19 +1,32 @@
-const { test, describe, after, beforeEach, before } = require('node:test')
+const { test, describe, after, beforeEach } = require('node:test')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
 const assert = require('node:assert')
+const bcrypt = require('bcrypt')
 
 const api = supertest(app)
 const helper = require('./test_helper')
+const User = require('../models/user')
 
-beforeEach( async () => {
+const resetBlogDb = async () => {
     await Blog.deleteMany({})
 
     const blogObjects = helper.initialBlogs.map(blog => new Blog(blog))
     const promiseArray = blogObjects.map(blog => blog.save())
     await Promise.all(promiseArray)
+}
+
+const resetUsersInDb = async () => {
+    await User.deleteMany({})
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'The-Memin', name: "Guillermo", passwordHash })
+    await user.save()
+}
+
+beforeEach( async () => {
+    await resetBlogDb()
 })
 describe('GET /api/blogs', () => {
     test('blogs are returned as json', async () => {
@@ -32,10 +45,19 @@ describe('GET /api/blogs', () => {
 
 describe('POST /api/blogs', () => {
     let userId
-
-    before(async () => {
+    let loginResponse
+    let token
+    beforeEach(async () => {
         const users = await helper.usersInDb()
         userId = users[0].id
+        await resetUsersInDb()
+        await resetBlogDb()
+
+        loginResponse = await api
+        .post('/api/login')
+        .send({ username: 'The-Memin', password: 'sekret' })
+
+        token = loginResponse.body.token
     })
 
     test('a valid blog can be added', async () => {
@@ -45,12 +67,12 @@ describe('POST /api/blogs', () => {
             title: "async/await simplifies making async calls",
             author: "Yo",
             url: "www.yoyo.com.mx",
-            likes: 3023,
-            userId
+            likes: 3023
         }
 
         await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -72,11 +94,11 @@ describe('POST /api/blogs', () => {
             title: 'New Blog',
             author: 'author2',
             url: "www.author2.com",
-            userId
         }
 
         await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -99,6 +121,7 @@ describe('POST /api/blogs', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(400)
             .expect('Content-Type', /application\/json/)
@@ -118,6 +141,7 @@ describe('POST /api/blogs', () => {
 
         const response = await api
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog)
             .expect(400)
             .expect('Content-Type', /application\/json/)
