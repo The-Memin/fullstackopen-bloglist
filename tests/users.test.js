@@ -46,7 +46,7 @@ describe('when there is initially one user in db', () => {
         const newUser = {
             username: 'root',
             name: 'Superuser',
-            password: 'salainen'
+            password: 'password*123'
         }
 
         const result = await api
@@ -57,6 +57,49 @@ describe('when there is initially one user in db', () => {
 
         const usersAtEnd = await helper.usersInDb()
         assert(result.body.error.includes('expeted `username` to be unique'))
+
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+    })
+
+
+    test('creation fails if the username is less than 3 characters or does not start with a letter', async () => {
+        const usersAtStart = await helper.usersInDb()
+
+        const newUser = {
+            username: 'no',
+            name: 'name',
+            password: 'password*123'
+        }
+
+        const result = await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+            .expect('Content-Type', /application\/json/ )
+
+        const usersAtEnd = await helper.usersInDb()
+        assert.match(result.body.error, /username.*start.*letter/i)
+
+        assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+    })
+
+    test('creation fails if the password is less than 3 characters or does match with the caractheristics', async () => {
+        const usersAtStart = await helper.usersInDb()
+
+        const newUser = {
+            username: 'username',
+            name: 'name',
+            password: 'password'
+        }
+
+        const result = await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+            .expect('Content-Type', /application\/json/ )
+
+        const usersAtEnd = await helper.usersInDb()
+        assert(result.body.error.includes('Password must be at least 3 characters long, include at least one letter, one number, and one special character'))
 
         assert.strictEqual(usersAtEnd.length, usersAtStart.length)
     })
