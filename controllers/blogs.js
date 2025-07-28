@@ -1,11 +1,10 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
-const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 
 blogsRouter.get('/', async (request, response) => {
-    const blogs = await Blog.find({}).populate('user')
+    const blogs = await Blog.find({})
     response.json(blogs)
 })
 
@@ -39,40 +38,62 @@ blogsRouter.post('/', async (request, response, next) => {
 
 blogsRouter.delete('/:id', async (request, response, next) => {
   const { id } = request.params
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return response.status(400).json({ error: 'invalid ID' })
-  }
   try {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
 
-    const result = await Blog.findByIdAndDelete(id)
-
-    if (!result) {
-      return response.status(404).json({ error: 'Blog no found' })
+    if(!decodedToken.id) {
+      return response.status(401).json({ error: 'Token missing or invalid' })
     }
-    response.status(204).send(result)
+
+    const blog = await Blog.findById(id)
+
+    if (!blog) {
+      return response.status(404).json({ error: 'Blog not found' })
+    }
+
+    if (blog.user.toString() !== decodedToken.id.toString()) {
+      return response.status(403).json({ error: 'You do not have permission to delete this blog' })
+    }
+
+    await Blog.findByIdAndDelete(id)
+    response.status(204).end()
+
   } catch (error) {
     next(error)
   }
 })
 
 blogsRouter.put('/:id', async (request, response, next) => {
-
   const { id } = request.params
+  const { title, author, url, likes } = request.body
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return response.status(400).json({ error: 'invalid ID' })
+  if (!request.token) {
+    return response.status(401).json({ error: 'Token missing' })
   }
 
   try {
-    const updatedBlog = await Blog.findByIdAndUpdate( id, request.body, {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if(!decodedToken.id) {
+      return response.status(401).json({ error: 'Token invalid' })
+    }
+
+    const blog = await Blog.findById(id)
+    if (!blog) {
+      return response.status(404).json({ error: 'Blog not found' })
+    }
+
+    if (blog.user.toString() !== decodedToken.id.toString()) {
+      return response.status(403).json({ error: 'You do not have permission to update this blog' })
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate( id, { title, author, url, likes }, {
       new: true,
       runValidators: true,
       context: 'query'
     })
 
     if (!updatedBlog) {
-      return response.status(404).json({ error: 'blog not found' })
+      return response.status(404).json({ error: 'Blog not found' })
     }
     response.status(200).json(updatedBlog)
   } catch (error) {
