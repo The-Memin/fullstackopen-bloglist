@@ -3,19 +3,19 @@ GET http://localhost:3001/api/blogs
 ###
 POST http://localhost:3001/api/blogs
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRoZS1NZW1pbiIsImlkIjoiNjg4N2M4YTE3NzJiOTBjYzUyODhhNzA3IiwiaWF0IjoxNzUzNzI5MjIxLCJleHAiOjE3NTM3MzI4MjF9.oQx1bruv4CqeTbkoOOutp4uuyeVE2911W4p6Op2jI-c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRoZS1NZW1pbiIsImlkIjoiNjg4N2M4YTE3NzJiOTBjYzUyODhhNzA3IiwiaWF0IjoxNzUzNzM0MTk5LCJleHAiOjE3NTM3Mzc3OTl9.eFOWEQUtUn3E4G4ugKSM7n80flz1x1SIndeEOZL1qI0
 
 {
-    "title": "Blog 1",
+    "title": "Blog 2",
     "author": "The-Memin",
     "url": "www.newblog.com.mx",
-    "likes": 300
+    "likes": 200
 }
 
 ###
-DELETE http://localhost:3001/api/blogs/6887d2efdc0c518433fa11a0
+DELETE http://localhost:3001/api/blogs/6887d5fcd117dfd4347d0b06
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRoZS1NZW1pbiIsImlkIjoiNjg4N2M4YTE3NzJiOTBjYzUyODhhNzA3IiwiaWF0IjoxNzUzNzMxNDY0LCJleHAiOjE3NTM3MzUwNjR9.9xvgC_lnn5Ym55y7LQs-AxFFmEGUAS90TywnXmKtACo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRoZS1NZW1pbiIsImlkIjoiNjg4N2M4YTE3NzJiOTBjYzUyODhhNzA3IiwiaWF0IjoxNzUzNzM0MTk5LCJleHAiOjE3NTM3Mzc3OTl9.eFOWEQUtUn3E4G4ugKSM7n80flz1x1SIndeEOZL1qI0
 
 ###
 PUT http://localhost:3001/api/blogs/6887d5fcd117dfd4347d0b06
