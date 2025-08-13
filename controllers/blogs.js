@@ -32,6 +32,7 @@ blogsRouter.post('/', userExtractor, async (request, response, next) => {
     response.status(201).json(savedBlog)
   }
   catch(exception){
+    console.log(exception.name)
     next(exception)
   }
 })
